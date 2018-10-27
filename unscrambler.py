@@ -33,17 +33,17 @@ def digest_word(word):
 
 
 def generate_digest_dictionary():
-    load_dictionary()
-    global digested_dictionary
+
+    if not words_dict:
+        load_dictionary()
+    digested_dictionary = {}
     results = {}
     longest = 1
     temp_dict = {}
     for word in words_dict:
-
         digested = digest_word(word)
         res = digested_dictionary.get(digested, [])
         res.append(word)
-
         digested_dictionary[digested] = res
         if len(res) >= longest:
             longest = len(res)
@@ -55,6 +55,7 @@ def generate_digest_dictionary():
     for item, val in results.items():
         if val['anagrams_count'] > 1:
             print("{}, {}".format(item, val))
+    return digested_dictionary
 
 
 def show_word_with_increment(target, start, inc):
@@ -86,6 +87,40 @@ def _solve_anagram(target):
     return matches.copy()
 
 
+def _solve_anagram_quick(target, dig_dict=generate_digest_dictionary()):
+    return dig_dict[digest_word(target)]
+
+
+def _check_for_word_subset(a, b):
+    # Return true, XXXX if a is sub of b, XXXX, true if b is sub of a
+    a = list(a)
+    b = list(b)
+    only_a_has = []
+    only_b_has = []
+    for char in a:
+
+        if char in b:
+            del b[b.index(char)]
+        else:
+            only_a_has.append(char)
+    only_b_has = b
+    return len(only_a_has) == 0, len(only_b_has) == 0
+
+
+def _solve_anagram_quick_including_subsets(
+        target, dig_dict=generate_digest_dictionary()):
+    all_anagrams = []
+    dig_target = digest_word(target)
+    for word, agrams in dig_dict.items():
+        if _check_for_word_subset(word, dig_target)[0]:
+            all_anagrams += agrams
+
+    return all_anagrams
+
+
+print(_solve_anagram_quick_including_subsets("eohll"))
+
+
 def solve_anagram():
     load_dictionary()
     target = str(input("enter a word: "))
@@ -100,7 +135,7 @@ def solve_anagram():
         print(" - {}".format(match))
 
 
-def find_most_common_anagram_brue_force(min_length=3):
+def find_most_common_anagram_brute_force(min_length=3):
     results = {}
 
     load_dictionary()
@@ -123,4 +158,5 @@ def find_most_common_anagram_brue_force(min_length=3):
 
 # solve_anagram()
 # find_most_common_anagram()
-generate_digest_dictionary()
+# generate_digest_dictionary()
+# print(_solve_anagram_quick("sbcsiea"))
